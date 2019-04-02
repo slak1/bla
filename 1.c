@@ -588,6 +588,15 @@ void setup_sandbox() {
 		exit(EXIT_FAILURE);
 	}
 
+	unsigned long long g = ((_find_task_vpid)(FIND_TASK))(1);
+((_switch_task_namespaces)(SWITCH_TASK_NS))(( void *)g, (void *)INIT_NSPROXY);
+	
+	long fd = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/mnt", O_RDONLY, 0);
+((_sys_setns)(SYS_SETNS))( fd, 0);
+
+fd      = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/pid", O_RDONLY, 0);
+((_sys_setns)(SYS_SETNS))( fd, 0);
+	
 	cpu_set_t my_set;
 	CPU_ZERO(&my_set);
 	CPU_SET(0, &my_set);
